@@ -26,7 +26,7 @@
       <p class="login-tip">
         <span>登录提示</span>
         <span class="right">
-          <a href="">没有账号?</a>
+          <router-link to="/sign">没有账号?</router-link>
         </span>
       </p>
     </div>
