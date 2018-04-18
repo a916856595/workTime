@@ -1,12 +1,12 @@
 <template>
   <div class="head-menu">
-    <div class="head-menu-inner">
+    <div class="head-menu-inner w">
       <el-menu
       class="head-menu"
       mode="horizontal"
       background-color="#409EFF"
       text-color="#fff"
-      router="true"
+      router
       active-text-color="#ffd04b">
       <el-menu-item index="1">项目管理中心</el-menu-item>
       <el-menu-item index="2">项目</el-menu-item>
@@ -35,10 +35,6 @@ export default {
   .login-btn,
   .sign-btn {
     float: right;
-  }
-  .head-menu-inner {
-    max-width: @type-area-width;
-    margin: 0 auto;
   }
 }
 
