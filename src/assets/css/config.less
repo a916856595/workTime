@@ -12,6 +12,31 @@ li {
   list-style: none;
 }
 
+p {
+  margin: 0;
+}
+
 .g-bottom-btn-box {
   text-align: center;
+}
+
+// 全局表单样式
+ul.g-form-ul {
+
+}
+
+ul.g-form-ul>li {
+  position: relative;
+  padding-bottom: 35px;
+  .form-tip {
+    position: absolute;
+    font-size: 12px;
+    line-height: 35px;
+    .el-icon-circle-close {
+      color: red;
+    }
+    .el-icon-circle-check {
+      color: green;
+    }
+  }
 }

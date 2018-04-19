@@ -34,7 +34,7 @@ export default {
   background: #409EFF;
   .login-btn,
   .sign-btn {
-    float: right;
+    float: right !important;
   }
 }
 

@@ -4,7 +4,7 @@
       <div slot="header" class="clearfix">
         <span>注册管理平台</span>
       </div>
-      <ul class="sign-body">
+      <ul class="sign-body g-form-ul">
         <li>
           <span>用&nbsp;户&nbsp;&nbsp;名：</span>
           <div class="input-box">
@@ -14,10 +14,23 @@
               v-on:blur="checkUserName()"
               clearable>
             </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.userName === 'live'">
+                <i class="el-icon-circle-close"></i>
+                <span>用户名已被占用！</span>
+              </p>
+              <p v-show="vaildObj.userName === 'useful'">
+                <i class="el-icon-circle-check"></i>
+                <span>恭喜，用户名可用！</span>
+              </p>
+              <p v-show="vaildObj.userName === 'checking'">
+                <i class="el-icon-loading"></i>
+                <span>校验中，请稍候...</span>
+              </p>
+            </div>
           </div>
         </li>
         <li>
-          <li>
           <span>昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称：</span>
           <div class="input-box">
             <el-input
@@ -59,6 +72,15 @@
 </template>
 
 <script>
+'use strict'
+
+var vaildObj = {
+  'userName': '',
+  'nickName': '',
+  'password': '',
+  'passwordRepeat': ''
+};
+
 function sign() {
   var data = {
     'userName': this.userName,
@@ -73,13 +95,24 @@ function sign() {
 }
 
 function checkUserName() {
+  if (this.isSubmiting) {
+    return;
+  }
+  this.isSubmiting = true;
+  this.vaildObj.userName = 'checking';
   var data = {
     'userName': this.userName
   };
   this.$http.get('/user/checkUserName', { 'params': data }).then(function (result) {
-
+    if (result.body.result === 1) {
+      vaildObj.userName = 'useful';
+      this.isSubmiting = false;
+    } else {
+      vaildObj.userName = 'live';
+      this.isSubmiting = false;
+    }
   }, function (msg) {
-    
+    this.isSubmiting = false;
   })
 }
 
@@ -89,7 +122,9 @@ export default {
     'userName': '',
     'nickName': '',
     'password': '',
-    'passwordRepeat': ''
+    'passwordRepeat': '',
+    'isSubmiting': false,
+    'vaildObj': vaildObj
   }},
   'methods': {
     'sign': sign,
@@ -114,7 +149,6 @@ export default {
         }
         .input-box {
           margin-left: 80px;
-          margin-bottom: @input-mg-bt;
         }
       }
     }
