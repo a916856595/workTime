@@ -12,20 +12,29 @@
               placeholder="请输入用户名"
               v-model="userName"
               v-on:blur="checkUserName()"
+              v-on:focus="vaildObj.userName = 'edit'"
               clearable>
             </el-input>
             <div class="form-tip">
+              <p v-show="vaildObj.userName === 'edit'">
+                <i class="el-icon-info"></i>
+                <span>请输入6-18位英文或数字</span>
+              </p>
               <p v-show="vaildObj.userName === 'live'">
-                <i class="el-icon-circle-close"></i>
+                <i class="el-icon-error"></i>
                 <span>用户名已被占用！</span>
               </p>
               <p v-show="vaildObj.userName === 'useful'">
-                <i class="el-icon-circle-check"></i>
+                <i class="el-icon-success"></i>
                 <span>恭喜，用户名可用！</span>
               </p>
               <p v-show="vaildObj.userName === 'checking'">
                 <i class="el-icon-loading"></i>
                 <span>校验中，请稍候...</span>
+              </p>
+              <p v-show="vaildObj.userName === 'format'">
+                <i class="el-icon-error"></i>
+                <span>用户名格式不正确,请重新检查！</span>
               </p>
             </div>
           </div>
@@ -47,8 +56,20 @@
               placeholder="请输入密码"
               v-model="password"
               type="password"
+              v-on:blur="checkPassword()"
+              v-on:focus="vaildObj.password = 'edit'"
               clearable>
             </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.password === 'edit'">
+                <i class="el-icon-info"></i>
+                <span>请输入6-18位英文或数字</span>
+              </p>
+              <p v-show="vaildObj.password === 'format'">
+                <i class="el-icon-error"></i>
+                <span>密码格式不正确,请重新检查！</span>
+              </p>
+            </div>
           </div>
         </li>
         <li>
@@ -58,8 +79,24 @@
               placeholder="请再次输入密码"
               v-model="passwordRepeat"
               type="password"
+              v-on:blur="checkPasswordRepeat()"
+              v-on:focus="vaildObj.passwordRepeat = 'edit'"
               clearable>
             </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.passwordRepeat === 'edit'">
+                <i class="el-icon-info"></i>
+                <span>请再次输入密码</span>
+              </p>
+              <p v-show="vaildObj.passwordRepeat === 'not-equal'">
+                <i class="el-icon-error"></i>
+                <span>两次密码不一致,请重新检查！</span>
+              </p>
+              <p v-show="vaildObj.passwordRepeat === 'empty'">
+                <i class="el-icon-error"></i>
+                <span>请再次输入密码！</span>
+              </p>
+            </div>
           </div>
         </li>
       </ul>
@@ -87,7 +124,7 @@ function sign() {
     'nickName': this.nickName,
     'password': this.password
   };
-  this.$http.post('/user/sign', data, {emulateJSON: true}).then(function(result) {
+  this.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
 
   }, function (msg) {
 
@@ -95,6 +132,18 @@ function sign() {
 }
 
 function checkUserName() {
+  if (this.userName !== '') {
+    if (!this.Global.RegExp.userName.test(this.userName)) {
+      this.vaildObj.userName = 'format';
+    } else {
+      this.checkUserNameBackEnd();
+    }
+  } else {
+    this.vaildObj.userName = '';
+  }
+}
+
+function checkUserNameBackEnd() {
   if (this.isSubmiting) {
     return;
   }
@@ -103,7 +152,7 @@ function checkUserName() {
   var data = {
     'userName': this.userName
   };
-  this.$http.get('/user/checkUserName', { 'params': data }).then(function (result) {
+  this.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
     if (result.body.result === 1) {
       vaildObj.userName = 'useful';
       this.isSubmiting = false;
@@ -114,6 +163,47 @@ function checkUserName() {
   }, function (msg) {
     this.isSubmiting = false;
   })
+}
+
+function checkPassword() {
+  if (this.password!== '') {
+    if (!this.Global.RegExp.password.test(this.password)) {
+      this.vaildObj.password = 'format';
+    } else {
+      this.vaildObj.password = '';
+    }
+  } else {
+    this.vaildObj.password = '';
+  }
+}
+
+function checkPasswordRepeat() {
+  if (this.passwordRepeat !== '') {
+    if (this.passwordRepeat !== this.password) {
+      this.vaildObj.passwordRepeat = 'not-equal';
+    } else {
+      this.vaildObj.passwordRepeat = '';
+    }
+  } else {
+    this.vaildObj.passwordRepeat = '';
+  }
+}
+
+function checkAllFieldIsEmpty() {
+  if (this.userName === '') {
+    this.vaildObj.userName = 'empty';
+  }
+  if (this.password === '') {
+    this.vaildObj.password = 'empty';
+  }
+  if (this.passwordRepeat === '') {
+    this.vaildObj.passwordRepeat = 'empty';
+  }
+}
+
+function checkAllField() {
+  this.checkPassword();
+  this.checkPasswordRepeat();
 }
 
 export default {
@@ -128,7 +218,11 @@ export default {
   }},
   'methods': {
     'sign': sign,
-    'checkUserName': checkUserName
+    'checkUserName': checkUserName,
+    'checkUserNameBackEnd': checkUserNameBackEnd,
+    'checkPassword': checkPassword,
+    'checkPasswordRepeat': checkPasswordRepeat,
+    'checkAllFieldIsEmpty': checkAllFieldIsEmpty
   }
 }
 </script>

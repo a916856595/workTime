@@ -39,7 +39,7 @@ function login() {
     'userName': this.userName,
     'password': this.password
   };
-  this.$http.post('/user/login', data, {emulateJSON: true} ).then(function(result) {
+  this.$http.post('/api/user/login', data, {emulateJSON: true} ).then(function(result) {
 
   });
 }
