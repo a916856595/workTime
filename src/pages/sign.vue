@@ -36,6 +36,10 @@
                 <i class="el-icon-error"></i>
                 <span>用户名格式不正确,请重新检查！</span>
               </p>
+              <p v-show="vaildObj.userName === 'empty'">
+                <i class="el-icon-error"></i>
+                <span>请输入用户名！</span>
+              </p>
             </div>
           </div>
         </li>
@@ -68,6 +72,10 @@
               <p v-show="vaildObj.password === 'format'">
                 <i class="el-icon-error"></i>
                 <span>密码格式不正确,请重新检查！</span>
+              </p>
+              <p v-show="vaildObj.password === 'empty'">
+                <i class="el-icon-error"></i>
+                <span>请输入密码！</span>
               </p>
             </div>
           </div>
@@ -105,6 +113,16 @@
         <el-button type="plain" round>取&nbsp;&nbsp;消</el-button>
       </div>
     </el-card>
+    <el-dialog
+      title="提示信息"
+      :visible.sync="isShowModal"
+      width="30%"
+      center>
+      <span>注册成功</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" v-on:click="isShowModal = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -119,50 +137,74 @@ var vaildObj = {
 };
 
 function sign() {
-  var data = {
-    'userName': this.userName,
-    'nickName': this.nickName,
-    'password': this.password
-  };
-  this.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
-
-  }, function (msg) {
-
-  })
+  this.checkAllField().then(() => {
+    var data = {
+      'userName': this.userName,
+      'nickName': this.nickName,
+      'password': this.password
+    };
+    if (this.isSubmiting) {
+      return;
+    }
+    this.isSubmiting = true;
+    this.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
+      console.log(result)
+      if(result.body.result.code === 0) {
+        this.isShowModal = true;
+      }
+      this.isSubmiting = false;
+    }, function (msg) {
+      this.isSubmiting = false;
+    })
+  }, () => {
+    console.log('信息不完整，无法注册')
+  });
 }
 
 function checkUserName() {
-  if (this.userName !== '') {
-    if (!this.Global.RegExp.userName.test(this.userName)) {
-      this.vaildObj.userName = 'format';
+  return new Promise((resolve, reject) => {
+    if (this.userName !== '') {
+      if (!this.Global.RegExp.userName.test(this.userName)) {
+        this.vaildObj.userName = 'format';
+        resolve();
+      } else {
+        this.checkUserNameBackEnd().then(() => {
+          resolve();
+        }, () => {
+          reject();
+        });
+      }
     } else {
-      this.checkUserNameBackEnd();
+      this.vaildObj.userName = '';
+      resolve();
     }
-  } else {
-    this.vaildObj.userName = '';
-  }
+  });
 }
 
 function checkUserNameBackEnd() {
-  if (this.isSubmiting) {
-    return;
-  }
-  this.isSubmiting = true;
-  this.vaildObj.userName = 'checking';
-  var data = {
-    'userName': this.userName
-  };
-  this.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
-    if (result.body.result === 1) {
-      vaildObj.userName = 'useful';
-      this.isSubmiting = false;
-    } else {
-      vaildObj.userName = 'live';
-      this.isSubmiting = false;
+  return new Promise((resolve, reject) => {
+    if (this.isSubmiting) {
+      resolve();
     }
-  }, function (msg) {
-    this.isSubmiting = false;
-  })
+    this.isSubmiting = true;
+    this.vaildObj.userName = 'checking';
+    var data = {
+      'userName': this.userName
+    };
+    this.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
+      if (result.body.result === 1) {
+        vaildObj.userName = 'useful';
+        this.isSubmiting = false;
+      } else {
+        vaildObj.userName = 'live';
+        this.isSubmiting = false;
+      }
+      resolve();
+    }, function (msg) {
+      this.isSubmiting = false;
+      reject();
+    })
+  });
 }
 
 function checkPassword() {
@@ -202,8 +244,20 @@ function checkAllFieldIsEmpty() {
 }
 
 function checkAllField() {
-  this.checkPassword();
-  this.checkPasswordRepeat();
+  return new Promise((resolve, reject) => {
+    this.checkPassword();
+    this.checkPasswordRepeat();
+    this.checkUserName().then(() => {
+      this.checkAllFieldIsEmpty();
+      if (this.vaildObj.userName === 'useful' && this.vaildObj.password === '' && this.vaildObj.passwordRepeat === '') {
+        resolve();
+      } else {
+        reject();
+      }
+    }, () => {
+      reject();
+    });
+  })
 }
 
 export default {
@@ -214,6 +268,7 @@ export default {
     'password': '',
     'passwordRepeat': '',
     'isSubmiting': false,
+    'isShowModal': false,
     'vaildObj': vaildObj
   }},
   'methods': {
@@ -222,7 +277,8 @@ export default {
     'checkUserNameBackEnd': checkUserNameBackEnd,
     'checkPassword': checkPassword,
     'checkPasswordRepeat': checkPasswordRepeat,
-    'checkAllFieldIsEmpty': checkAllFieldIsEmpty
+    'checkAllFieldIsEmpty': checkAllFieldIsEmpty,
+    'checkAllField': checkAllField
   }
 }
 </script>
