@@ -49,8 +49,16 @@
             <el-input
               placeholder="请输入昵称"
               v-model="nickName"
+              v-on:blur="vaildObj.nickName = ''"
+              v-on:focus="vaildObj.nickName = 'edit'"
               clearable>
             </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.nickName === 'edit'">
+                <i class="el-icon-info"></i>
+                <span>输入一个你喜欢的名字</span>
+              </p>
+            </div>
           </div>
         </li>
         <li>
@@ -148,7 +156,6 @@ function sign() {
     }
     this.isSubmiting = true;
     this.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
-      console.log(result)
       if(result.body.result.code === 0) {
         this.isShowModal = true;
       }

@@ -30,6 +30,8 @@ export default {
 
 <style lang="less" scope>
 .head-menu {
+  position: relative;
+  z-index: 99;
   height: 60px;
   background: #409EFF;
   .login-btn,
