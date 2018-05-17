@@ -28,7 +28,7 @@ var app = new Vue({
 
 function requestGet(url, data) {
   return new Promise(function (resolve, reject) {
-    app.$http.get(url, data).then(function (response) {
+    Vue.http.get(url, data).then(function (response) {
       var status = response.body.status;
       if (status === 'success') {
         resolve(response.body.result);
@@ -43,7 +43,7 @@ function requestGet(url, data) {
 
 function requestPost(url, data) {
   return new Promise(function (resolve, reject) {
-    app.$http.post(url, data, { emulateJSON: true }).then(function (response) {
+    Vue.http.post(url, data, { emulateJSON: true }).then(function (response) {
       var status = response.body.status;
       if (status === 'success') {
         resolve(response.body.result);

@@ -145,23 +145,24 @@ var vaildObj = {
 };
 
 function sign() {
-  this.checkAllField().then(() => {
+  var vm = this;
+  vm.checkAllField().then(() => {
     var data = {
-      'userName': this.userName,
-      'nickName': this.nickName,
-      'password': this.password
+      'userName': vm.userName,
+      'nickName': vm.nickName,
+      'password': vm.password
     };
-    if (this.isSubmiting) {
+    if (vm.isSubmiting) {
       return;
     }
-    this.isSubmiting = true;
-    this.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
+    vm.isSubmiting = true;
+    vm.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
       if(result.body.result.code === 0) {
-        this.isShowModal = true;
+        vm.isShowModal = true;
       }
-      this.isSubmiting = false;
+      vm.isSubmiting = false;
     }, function (msg) {
-      this.isSubmiting = false;
+      vm.isSubmiting = false;
     })
   }, () => {
     console.log('信息不完整，无法注册')
@@ -169,94 +170,100 @@ function sign() {
 }
 
 function checkUserName() {
+  var vm = this;
   return new Promise((resolve, reject) => {
-    if (this.userName !== '') {
-      if (!this.Global.RegExp.userName.test(this.userName)) {
-        this.vaildObj.userName = 'format';
+    if (vm.userName !== '') {
+      if (!vm.Global.RegExp.userName.test(vm.userName)) {
+        vm.vaildObj.userName = 'format';
         resolve();
       } else {
-        this.checkUserNameBackEnd().then(() => {
+        vm.checkUserNameBackEnd().then(() => {
           resolve();
         }, () => {
           reject();
         });
       }
     } else {
-      this.vaildObj.userName = '';
+      vm.vaildObj.userName = '';
       resolve();
     }
   });
 }
 
 function checkUserNameBackEnd() {
+  var vm = this;
   return new Promise((resolve, reject) => {
-    if (this.isSubmiting) {
+    if (vm.isSubmiting) {
       resolve();
     }
-    this.isSubmiting = true;
-    this.vaildObj.userName = 'checking';
+    vm.isSubmiting = true;
+    vm.vaildObj.userName = 'checking';
     var data = {
-      'userName': this.userName
+      'userName': vm.userName
     };
-    this.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
+    vm.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
       if (result.body.result === 1) {
         vaildObj.userName = 'useful';
-        this.isSubmiting = false;
+        vm.isSubmiting = false;
       } else {
         vaildObj.userName = 'live';
-        this.isSubmiting = false;
+        vm.isSubmiting = false;
       }
       resolve();
     }, function (msg) {
-      this.isSubmiting = false;
+      vm.isSubmiting = false;
       reject();
     })
   });
 }
 
 function checkPassword() {
-  if (this.password!== '') {
-    if (!this.Global.RegExp.password.test(this.password)) {
-      this.vaildObj.password = 'format';
+  var vm = this;
+  if (vm.password!== '') {
+    if (!vm.Global.RegExp.password.test(vm.password)) {
+      vm.vaildObj.password = 'format';
     } else {
-      this.vaildObj.password = '';
+      vm.vaildObj.password = '';
     }
   } else {
-    this.vaildObj.password = '';
+    vm.vaildObj.password = '';
   }
 }
 
 function checkPasswordRepeat() {
-  if (this.passwordRepeat !== '') {
-    if (this.passwordRepeat !== this.password) {
-      this.vaildObj.passwordRepeat = 'not-equal';
+  var vm = this;
+  if (vm.passwordRepeat !== '') {
+    if (vm.passwordRepeat !== vm.password) {
+      vm.vaildObj.passwordRepeat = 'not-equal';
     } else {
-      this.vaildObj.passwordRepeat = '';
+      vm.vaildObj.passwordRepeat = '';
     }
   } else {
-    this.vaildObj.passwordRepeat = '';
+    vm.vaildObj.passwordRepeat = '';
   }
 }
 
 function checkAllFieldIsEmpty() {
-  if (this.userName === '') {
-    this.vaildObj.userName = 'empty';
+  var vm = this;
+  if (vm.userName === '') {
+    vm.vaildObj.userName = 'empty';
   }
-  if (this.password === '') {
-    this.vaildObj.password = 'empty';
+  if (vm.password === '') {
+    vm.vaildObj.password = 'empty';
   }
-  if (this.passwordRepeat === '') {
-    this.vaildObj.passwordRepeat = 'empty';
+  if (vm.passwordRepeat === '') {
+    vm.vaildObj.passwordRepeat = 'empty';
   }
 }
 
 function checkAllField() {
+  var vm = this;
   return new Promise((resolve, reject) => {
-    this.checkPassword();
-    this.checkPasswordRepeat();
-    this.checkUserName().then(() => {
-      this.checkAllFieldIsEmpty();
-      if (this.vaildObj.userName === 'useful' && this.vaildObj.password === '' && this.vaildObj.passwordRepeat === '') {
+    vm.checkPassword();
+    vm.checkPasswordRepeat();
+    vm.checkUserName().then(() => {
+      vm.checkAllFieldIsEmpty();
+      if (vm.vaildObj.userName === 'useful' && vm.vaildObj.password === '' && vm.vaildObj.passwordRepeat === '') {
         resolve();
       } else {
         reject();

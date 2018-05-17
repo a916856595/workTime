@@ -2,23 +2,45 @@
   <div class="login-background">
     <div class="w">
       <div class="login-box">
-        <div class="top">
-          <el-input
-            placeholder="请输入用户名"
-            v-model="userName"
-            clearable
-            class="user-input">
-            <template slot="prepend">用户名</template>
-          </el-input>
-          <el-input
-            placeholder="请输入密码"
-            v-model="password"
-            clearable
-            type="password"
-            class="user-input">
-            <template slot="prepend">密&nbsp;&nbsp;&nbsp;码</template>
-          </el-input>
-        </div>
+        <ul class="g-form-ul">
+          <li>
+            <el-input
+              placeholder="请输入用户名"
+              v-model="userName"
+              v-on:focus="vaildObj.account = ''"
+              clearable
+              class="user-input">
+              <template slot="prepend">用户名</template>
+            </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.account === 'unlive'">
+                <i class="el-icon-error"></i>
+                <span>账号不存在！</span>
+              </p>
+              <p v-show="vaildObj.account === 'server-error'">
+                <i class="el-icon-error"></i>
+                <span>服务器错误,请稍后再试！</span>
+              </p>
+            </div>
+          </li>
+          <li>
+            <el-input
+              placeholder="请输入密码"
+              v-model="password"
+              v-on:focus="vaildObj.password = ''"
+              clearable
+              type="password"
+              class="user-input">
+              <template slot="prepend">密&nbsp;&nbsp;&nbsp;码</template>
+            </el-input>
+            <div class="form-tip">
+              <p v-show="vaildObj.password === 'error'">
+                <i class="el-icon-error"></i>
+                <span>密码错误！</span>
+              </p>
+            </div>
+          </li>
+        </ul>
         <div class="bottom">
           <el-button 
             type="primary"
@@ -39,12 +61,33 @@
 
 <script>
 function login() {
+  var vm = this;
+  if (vm.isSumbiting) {
+    return;
+  }
+  vm.isSumbiting = true;
   var data = {
-    'userName': this.userName,
-    'password': this.password
+    'userName': vm.userName,
+    'password': vm.password
   };
-  this.request.post('/api/user/login', data).then(function(result) {
-    console.log(result)
+  vm.request.post('/api/user/login', data).then(function(result) {
+    if (result.code === 1) {
+      vm.vaildObj.account = 'unlive';
+    } else if (result.code === 2) {
+      vm.vaildObj.password = 'error';
+    } else if (result.code === 3) {
+      vm.vaildObj.account = 'server-error';
+    } else {
+      vm.$router.push({
+        name: 'userInfo',
+        params: {
+          userId: result.userId
+        }
+      });
+    }
+    vm.isSumbiting = false;
+  }, msg => {
+    
   });
 }
 
@@ -52,12 +95,17 @@ export default {
   'name': 'login',
   'data': () => {
     return {
-      'userName': '',
-      'password': ''
+      isSumbiting: false,
+      userName: '',
+      password: '',
+      vaildObj: {
+        account: '',
+        password: ''
+      }
     }
   },
   'methods': {
-    'login': login
+    login
   }
 }
 </script>
@@ -81,14 +129,10 @@ export default {
   transform: translateY(-50%);
   background-color: #fff;
   width: 300px;
-  padding: 20px;
+  padding: 35px;
   border: 1px solid #bbb;
   border-radius: 5px;
   box-shadow: 0 0 5px 0 #bbb;
-}
-
-.top .user-input {
-  margin-bottom: 20px;
 }
 
 .login-btn {

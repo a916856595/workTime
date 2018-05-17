@@ -30,8 +30,38 @@
 </template>
 
 <script>
+function active() {
+  var vm = this;
+  vm.getUserDetail();
+}
+
+function getUserDetail() {
+  var vm = this;
+  var data = {
+    userId: vm.$route.params.userId
+  };
+  vm.request.get('/api/user/userDetail', { params: data }).then(result => {
+    console.log(result);
+  }, msg => {
+    console.log('err', msg);
+  });
+}
+
+
 export default {
-  
+  data: () => {
+    return {
+
+    }
+  },
+  methods: {
+    active,
+    getUserDetail,
+  },
+  mounted: function () {
+    var vm = this;
+    vm.active();
+  }
 }
 </script>
 

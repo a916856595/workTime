@@ -18,7 +18,7 @@ export default new Router({
       name: "sign",
       component: sign
     }, {
-      path: "/userInfo",
+      path: "/userInfo/:userId",
       name: "userInfo",
       component: userInfo
     }, {
