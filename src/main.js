@@ -1,11 +1,62 @@
 
 import Vue from 'vue';
-import VueResource from 'vue-resource';
+import axios from "axios";
 import App from './App';
 import Global from './Global.vue';
 import router from './router';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import Qs from 'qs';
+
+// axios config
+var axiosRequest = axios.create({
+  transformRequest: [function (data) {
+    data = Qs.stringify(data);
+    return data;
+  }],
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+});
+
+axiosRequest.interceptors.response.use(function (response) {
+  var status = response.data.status;
+  if (status === 'success') {
+    return response;
+  } else if (status === 'need-login') {
+    window.location.hash = '/login';
+  } else {
+    console.log('err status', status);
+  }
+}, function (err) {
+  return Promise.reject(err);
+});
+
+function requestGet(url, data) {
+  return new Promise((resolve, reject) => {
+    axiosRequest.get(url, { params: data })
+      .then(function (response) {
+        resolve(response.data.result);
+      })
+      .catch(function (msg) {
+        reject(msg);
+      });
+  });
+}
+
+function requestPost(url, data) {
+  return new Promise((resolve, reject) => {
+    axiosRequest.post(url, data)
+      .then(function (response) {
+        resolve(response.data.result);
+      })
+      .catch(function (msg) {
+        reject(msg);
+      });
+  });
+}
+// axios config end
 
 var request = {
   'get': requestGet,
@@ -14,7 +65,6 @@ var request = {
 
 Vue.config.productionTip = false
 
-Vue.use(VueResource);
 Vue.use(ElementUI);
 Vue.prototype.Global = Global;
 Vue.prototype.request = request;
@@ -25,33 +75,3 @@ var app = new Vue({
   components: { App },
   template: '<App/>'
 });
-
-function requestGet(url, data) {
-  return new Promise(function (resolve, reject) {
-    Vue.http.get(url, data).then(function (response) {
-      var status = response.body.status;
-      if (status === 'success') {
-        resolve(response.body.result);
-      } else if (status === 'need-login'){
-        window.location.hash = '/login';
-      }
-    }, function (msg) {
-      reject(msg);
-    });
-  });
-}
-
-function requestPost(url, data) {
-  return new Promise(function (resolve, reject) {
-    Vue.http.post(url, data, { emulateJSON: true }).then(function (response) {
-      var status = response.body.status;
-      if (status === 'success') {
-        resolve(response.body.result);
-      } else if (status === 'need-login') {
-        window.location.hash = '/login';
-      }
-    }, function (msg) {
-      reject(msg);
-    });
-  });
-}

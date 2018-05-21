@@ -40,7 +40,7 @@ function getUserDetail() {
   var data = {
     userId: vm.$route.params.userId
   };
-  vm.request.get('/api/user/userDetail', { params: data }).then(result => {
+  vm.request.get('/user/userDetail', data).then(result => {
     console.log(result);
   }, msg => {
     console.log('err', msg);

@@ -156,9 +156,10 @@ function sign() {
       return;
     }
     vm.isSubmiting = true;
-    vm.$http.post('/api/user/sign', data, {emulateJSON: true}).then(function(result) {
-      if(result.body.result.code === 0) {
+    vm.request.post('/user/sign', data).then(result => {
+      if(result.code === 0) {
         vm.isShowModal = true;
+        vm.$router.push({ name: 'login' });
       }
       vm.isSubmiting = false;
     }, function (msg) {
@@ -201,8 +202,8 @@ function checkUserNameBackEnd() {
     var data = {
       'userName': vm.userName
     };
-    vm.$http.get('/api/user/checkUserName', { 'params': data }).then(function (result) {
-      if (result.body.result === 1) {
+    vm.request.get('/user/checkUserName', data).then(result => {
+      if (result.code === 1) {
         vaildObj.userName = 'useful';
         vm.isSubmiting = false;
       } else {
@@ -286,13 +287,13 @@ export default {
     'vaildObj': vaildObj
   }},
   'methods': {
-    'sign': sign,
-    'checkUserName': checkUserName,
-    'checkUserNameBackEnd': checkUserNameBackEnd,
-    'checkPassword': checkPassword,
-    'checkPasswordRepeat': checkPasswordRepeat,
-    'checkAllFieldIsEmpty': checkAllFieldIsEmpty,
-    'checkAllField': checkAllField
+    sign,
+    checkUserName,
+    checkUserNameBackEnd,
+    checkPassword,
+    checkPasswordRepeat,
+    checkAllFieldIsEmpty,
+    checkAllField
   }
 }
 </script>

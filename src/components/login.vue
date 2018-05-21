@@ -70,24 +70,24 @@ function login() {
     'userName': vm.userName,
     'password': vm.password
   };
-  vm.request.post('/api/user/login', data).then(function(result) {
-    if (result.code === 1) {
-      vm.vaildObj.account = 'unlive';
-    } else if (result.code === 2) {
-      vm.vaildObj.password = 'error';
-    } else if (result.code === 3) {
-      vm.vaildObj.account = 'server-error';
-    } else {
+  vm.request.post('/user/login', data).then(result => {
+    if (result.code === 0) {
       vm.$router.push({
         name: 'userInfo',
         params: {
           userId: result.userId
         }
       });
+    } else if (result.code === 1) {
+      vm.vaildObj.account = 'unlive';
+    } else if (result.code === 2) {
+      vm.vaildObj.password = 'error';
+    } else if (result.code === 3) {
+      vm.vaildObj.account = 'server-error';
     }
     vm.isSumbiting = false;
   }, msg => {
-    
+    vm.isSumbiting = false;
   });
 }
 
