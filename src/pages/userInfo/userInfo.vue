@@ -13,15 +13,15 @@
         <ul class="info-list">
           <li>
             <span>用户名：</span>
-            <span>123456</span>
+            <span v-text="userInfo.userName"></span>
           </li>
           <li>
             <span>昵称：</span>
-            <span>123456</span>
+            <span v-text="userInfo.nickName"></span>
           </li>
           <li>
             <span>用户组：</span>
-            <span>123456</span>
+            <span v-text="userInfo.userGroup"></span>
           </li>
         </ul>
       </div>
@@ -40,8 +40,10 @@ function getUserDetail() {
   var data = {
     userId: vm.$route.params.userId
   };
-  vm.request.get('/user/userDetail', data).then(result => {
-    console.log(result);
+  vm.request.get('/user/userDetail', data).then(responseData => {
+    if (responseData && responseData.userInfo) {
+      vm.userInfo = responseData.userInfo;
+    }
   }, msg => {
     console.log('err', msg);
   });
@@ -51,7 +53,7 @@ function getUserDetail() {
 export default {
   data: () => {
     return {
-
+      userInfo: {}
     }
   },
   methods: {
